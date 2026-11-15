@@ -1,0 +1,56 @@
+{% extends 'missions/base.html' %}{% load static %}
+{% block title %}NASA Missions Hub · NASA Explorer Hub{% endblock %}
+
+{% block content %}
+<div class="hub-view-container" aria-label="Mission Control Hub">
+  <span class="sr-only">Mission Control Hub</span>
+
+  <!-- Category Toggle Filter Bar -->
+  <div class="toggle-bar" role="tablist" aria-label="Mission categories">
+    <button class="toggle is-active" role="tab" data-filter="all" aria-selected="true" data-desc="Every mission in the hub.">
+      All missions <span class="count">{{ total }}</span>
+    </button>
+    {% for cat in categories %}
+    <button class="toggle" role="tab" data-filter="{{ cat.slug }}" aria-selected="false" data-desc="{{ cat.description }}">
+      <span class="toggle-icon">{{ cat.icon }}</span> {{ cat.name }} <span class="count">{{ cat.total }}</span>
+    </button>
+    {% endfor %}
+  </div>
+
+  <p class="missions-subtitle" id="blurb" aria-live="polite">Every mission in the hub.</p>
+
+  <!-- 3-Column Mission Card Grid -->
+  <div class="grid missions-grid">
+    {% for cat in categories %}
+      {% for v in cat.card_list %}
+      <a class="card {% if cat.is_deep_space %}card--deep{% endif %}" href="{{ v.get_absolute_url }}" data-category="{{ cat.slug }}">
+        <div class="card__img">
+          <img src="{% if v.image_path %}{% static v.image_path %}{% else %}{% static 'images/placeholder.svg' %}{% endif %}" alt="{{ v.name }}" loading="lazy" onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}';">
+          <span class="card-badge card-badge--{{ cat.slug }}">
+            <span class="badge-dot dot-{{ cat.slug }}"></span> {{ cat.name|upper }}
+          </span>
+        </div>
+        <div class="card__body">
+          <h3>{{ v.name }}</h3>
+          <p>{{ v.tagline|default:v.mission_type }}</p>
+          <div class="card__foot">
+            <span class="foot-questions">2 questions</span>
+            {% if v.certificate %}
+              <span class="status-btn status-btn--certified">✓ CERTIFIED 100%</span>
+            {% elif v.best_score is not None and v.best_score >= 60 %}
+              <span class="status-btn status-btn--certified">✓ CERTIFIED {{ v.best_score }}%</span>
+            {% else %}
+              <span class="status-btn status-btn--unattempted">NOT ATTEMPTED</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/hub.js' %}"></script>
+{% endblock %}

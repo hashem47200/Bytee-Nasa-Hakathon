@@ -1,0 +1,34 @@
+{% extends 'missions/base.html' %}{% load static %}
+{% block title %}Mission Exam · {{ vehicle.name }}{% endblock %}
+{% block content %}
+<div class="exam">
+  <nav class="crumbs"><a href="{% url 'home' %}">Hub</a> / <a href="{{ vehicle.get_absolute_url }}">{{ vehicle.name }}</a> / <span>Exam</span></nav>
+  <h1>Mission Exam</h1>
+  <p class="muted">{{ vehicle.name }} · pass mark {{ pass_percent }}%</p>
+  {% if not questions %}
+    <div class="panel"><p>This mission has no exam questions yet.</p><a class="btn" href="{{ vehicle.get_absolute_url }}">Back to the story</a></div>
+  {% else %}
+  {% if error %}<div class="error-box" role="alert">{{ error }}</div>{% endif %}
+  <form id="exam-form" method="post" novalidate>
+    {% csrf_token %}
+    <div class="steps-head"><span id="exam-step-label">Question 1 of {{ questions|length }}</span><span class="muted">Press 1–4 to choose</span></div>
+    <div class="bar" aria-hidden="true" style="margin-bottom:18px"><i id="exam-bar" style="width:{% widthratio 1 questions|length 100 %}%"></i></div>
+    {% for q in questions %}
+    <fieldset class="panel q-card q-step{% if forloop.first %} is-active{% endif %}">
+      <legend>{{ forloop.counter }}. {{ q.text }}</legend>
+      {% for a in q.answers.all %}
+      <label class="opt"><input type="radio" name="q_{{ q.id }}" value="{{ a.id }}" {% if selected %}{% for qid, aid in selected.items %}{% if qid == q.id and aid == a.id %}checked{% endif %}{% endfor %}{% endif %}> <span>{{ a.text }}</span><kbd>{{ forloop.counter }}</kbd></label>
+      {% endfor %}
+    </fieldset>
+    {% endfor %}
+    <div class="nav-row">
+      <button type="button" class="btn" id="btn-back" hidden>← Back</button>
+      <span></span>
+      <button type="button" class="btn btn--primary" id="btn-next" {% if questions|length == 1 %}hidden{% endif %}>Next →</button>
+      <button type="submit" class="btn btn--launch" id="btn-submit" style="padding:14px 26px;font-size:1rem" {% if questions|length > 1 %}hidden{% endif %}>Submit exam</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/quiz.js' %}"></script>{% endblock %}

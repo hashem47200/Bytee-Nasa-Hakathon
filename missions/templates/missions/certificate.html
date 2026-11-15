@@ -1,0 +1,49 @@
+{% extends 'missions/base.html' %}{% load static %}
+{% block title %}NASA Explorer Certificate{% endblock %}
+{% block body_attrs %} data-auto-print="{% if auto_print %}1{% else %}0{% endif %}"{% endblock %}
+{% block content %}
+{% if not cert %}
+<section class="panel locked">
+  <div class="lock">🔒</div>
+  <h1>Certificate locked</h1>
+  <p>Pass any mission exam with {{ pass_percent|default:"60" }}% or more to unlock your personalised NASA Explorer Certificate.</p>
+  <a class="btn btn--primary" href="{% url 'home' %}">Choose a mission</a>
+</section>
+{% else %}
+<h1 class="no-print">{% if public_view and not owner %}Certificate of Exploration{% else %}Your NASA Explorer Certificates{% endif %}</h1>
+<div class="cert-layout">
+  {% if certificates %}
+  <nav class="cert-list no-print" aria-label="Your certificates">
+    {% for c in certificates %}<a href="?mission={{ c.vehicle.slug }}" {% if c.pk == cert.pk %}aria-current="true"{% endif %}>🏅 {{ c.vehicle.name }}<br><small class="muted">{{ c.score_percent }}% · {{ c.issued_at|date:"j M Y" }}</small></a>{% endfor %}
+    <p class="muted"><small>{{ certificates|length }} of {{ total }} missions certified.</small></p>
+  </nav>
+  {% endif %}
+  <div>
+    <article class="paper" id="certificate">
+      <div class="org">NASA EXPLORER HUB</div>
+      <h1>Certificate of Exploration</h1>
+      <div class="muted">This certifies that</div>
+      <div class="name">{{ cert.recipient_name }}</div>
+      <div class="muted">has passed the Mission Exam for</div>
+      <div class="mission">{{ cert.vehicle.name }}</div>
+      <div>with a score of <strong>{{ cert.score_percent }}%</strong></div>
+      <div class="meta">Issued {{ cert.issued_at|date:"j F Y" }} · Certificate No. {{ cert.code }}</div>
+    </article>
+    <div class="actions no-print" style="justify-content:flex-start">
+      <a class="btn btn--success" href="{% url 'certificate_download' cert.code %}">⬇ Download PDF</a>
+      <button class="btn" type="button" data-print>🖨 Print</button>
+      <button class="btn" type="button" id="copy-link" data-url="{{ request.scheme }}://{{ request.get_host }}{{ cert.get_absolute_url }}">🔗 Copy share link</button>
+    </div>
+    {% if owner %}
+    <form class="panel no-print inline-form" method="post" action="{% url 'certificate_rename' cert.code %}" style="margin-top:18px">
+      {% csrf_token %}
+      <label for="rn" style="width:100%;font-weight:600">Name printed on this certificate</label>
+      <input id="rn" type="text" name="recipient_name" value="{{ cert.recipient_name }}" maxlength="80" required>
+      <button class="btn btn--primary" type="submit">Update name</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/certificate.js' %}"></script>{% endblock %}

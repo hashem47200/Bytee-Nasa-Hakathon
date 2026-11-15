@@ -1,0 +1,368 @@
+{
+  "mars": [
+    {
+      "id": 5,
+      "code": "M-4",
+      "name": "Mars Pathfinder",
+      "launch_date": "1996-12-04",
+      "landing_date": "1997-07-04",
+      "image": "images/Picture1___V5.jpg",
+      "story": "I am Mars Pathfinder, and I came to prove to everyone that big dreams don't necessarily need huge budgets to come true! In the summer of 1997, I arrived at Mars and made a wild and exciting landing; I protected myself with giant airbags that absorbed the impact and made me bounce and roll across the surface until I safely settled in Ares Vallis. Once I caught my breath, I opened my solar petal wings to gather energy, and released my brave little rover companion, Sojourner, to cruise across the red sands. I captured thousands of breathtaking images, measured atmospheric temperatures, and beamed the secrets of Mars back to Earth from the Carl Sagan Memorial Station—keeping humanity inspired until my final transmission!",
+      "questions": [
+        {
+          "question": "What was the name of the little rover companion deployed by Mars Pathfinder?",
+          "options": [
+            "Sojourner",
+            "Curiosity",
+            "Spirit",
+            "Perseverance"
+          ],
+          "correct_answer": "Sojourner",
+          "hint": "This 23-pound micro-rover was named in honor of abolitionist and civil rights pioneer Sojourner Truth."
+        },
+        {
+          "question": "What groundbreaking landing system cushioned Mars Pathfinder's touchdown onto the Martian surface?",
+          "options": [
+            "Giant bouncing airbags",
+            "Sky crane thruster descent",
+            "Solid rocket boosters only",
+            "Deep subterranean drill"
+          ],
+          "correct_answer": "Giant bouncing airbags",
+          "hint": "Pathfinder bounced over 15 times across the rocky plain of Ares Vallis before safely deflating."
+        }
+      ],
+      "question": "What was the name of the little rover companion released by Mars Pathfinder?",
+      "options": [
+        "Sojourner",
+        "Curiosity",
+        "Spirit"
+      ],
+      "correct_answer": "Sojourner"
+    },
+    {
+      "id": 6,
+      "code": "M-2",
+      "name": "Spirit Rover (MER-A)",
+      "launch_date": "2003-06-10",
+      "landing_date": "2004-01-04",
+      "image": "images/Picture1___V6.jpg",
+      "story": "I am Spirit, Oppy's brave twin! I touched down on Mars in January 2004 inside the deep Gusev Crater to hunt for clues of ancient lakes and hidden water beneath the rocks. For over six years of relentless adventure, my six wheels rolled across more than 7.7 kilometers of Martian terrain, conquering the Columbia Hills and surviving punishing Martian dust storms. When one of my front wheels jammed, I dragged it behind me—unwittingly trenching the soil and exposing brilliant white silica that proved hot springs or hydrothermal vents once existed here. I didn't stop exploring until my final transmission in March 2010. My adventurous spirit lives on among the stars!",
+      "questions": [
+        {
+          "question": "Inside which massive Martian impact crater did Spirit Rover touch down in 2004?",
+          "options": [
+            "Gusev Crater",
+            "Gale Crater",
+            "Jezero Crater",
+            "Victoria Crater"
+          ],
+          "correct_answer": "Gusev Crater",
+          "hint": "Scientists selected this 166-kilometer-wide crater because it appeared to be the bed of an ancient lake drained by Ma'adim Vallis."
+        },
+        {
+          "question": "What major geological evidence of past hydrothermal or volcanic water activity did Spirit uncover?",
+          "options": [
+            "Nearly pure silica deposits churned up by a jammed wheel",
+            "Liquid pools of freshwater",
+            "Fossilized coral reefs",
+            "Subterranean ice rivers"
+          ],
+          "correct_answer": "Nearly pure silica deposits churned up by a jammed wheel",
+          "hint": "Spirit's inoperative right front wheel scraped through the topsoil, revealing 90% pure silica reminiscent of Yellowstone geysers."
+        }
+      ],
+      "question": "Inside which crater did Spirit Rover touch down on Mars?",
+      "options": [
+        "Gusev Crater",
+        "Gale Crater",
+        "Jezero Crater"
+      ],
+      "correct_answer": "Gusev Crater"
+    },
+    {
+      "id": 1,
+      "code": "M-3",
+      "name": "Opportunity Rover (MER-B)",
+      "launch_date": "2003-07-08",
+      "landing_date": "2004-01-25",
+      "image": "images/Picture1____V1.jpg",
+      "story": "I'm Oppy (Opportunity). Built in 2003 to search for signs of past water on Mars, I made a wild, airbag-bouncing landing in Eagle Crater in 2004—and immediately got to work rewriting solar system history. Though designed for just a 90-day sprint, I turned it into a record-shattering 14-year marathon. Across 28 miles (45 kilometers) of uncharted desert, I discovered ancient hematite 'blueberries,' climbed massive crater rims like Endeavour, and uncovered definitive proof that neutral, potentially habitable water once flowed on the Red Planet. I even survived violent dust storms and braved brutal freezing winters, sending home over 200,000 breathtaking images and transforming how humanity sees Mars. In June 2018, a planet-wide dust storm finally blocked my solar panels, draining my batteries for good. I drifted to sleep beneath the red dust—leaving behind a legacy as one of the greatest robotic explorers in space history.",
+      "questions": [
+        {
+          "question": "What was the original planned prime mission lifespan for Opportunity on Mars?",
+          "options": [
+            "90 days",
+            "1 year",
+            "5 years",
+            "14 years"
+          ],
+          "correct_answer": "90 days",
+          "hint": "Engineers designed the twin rovers for a 90-Martian-day (sol) warranty, but Opportunity operated for over 5,000 sols!"
+        },
+        {
+          "question": "What famous mineral formations nicknamed 'blueberries' did Opportunity discover at Meridiani Planum?",
+          "options": [
+            "Hematite-rich mineral spherules formed in water",
+            "Solid sapphire meteorites",
+            "Frozen methane droplets",
+            "Volcanic obsidian pebbles"
+          ],
+          "correct_answer": "Hematite-rich mineral spherules formed in water",
+          "hint": "These tiny, gray spherules embedded in the sedimentary rock were precipitated by groundwater in ancient acidic Martian lakes."
+        }
+      ],
+      "question": "What was the original planned lifespan for Opportunity on Mars?",
+      "options": [
+        "90 days",
+        "1 year",
+        "14 years"
+      ],
+      "correct_answer": "90 days"
+    },
+    {
+      "id": 2,
+      "code": "M-5",
+      "name": "Viking 1 Lander",
+      "launch_date": "1975-08-20",
+      "landing_date": "1976-07-20",
+      "image": "images/Picture1___V2.jpg",
+      "story": "I am the Viking 1 Lander, born in Colorado and launched in 1975 to embark on a historic journey to Mars. When I landed on the dusty plains of Chryse Planitia in July 1976, I became the very first spacecraft in human history to safely touch down and operate long-term on Mars, transmitting clear, surface-level photographs back to Earth to give humanity its first real look at an alien world. Equipped with a robotic sampling arm and automated biology laboratory instruments, I analyzed surface chemistry and performed historic experiments searching for signs of microbial life in the soil. Day after day, I monitored Martian weather, recorded wind speeds, and measured atmospheric pressure to create the first multi-year weather database of another planet. Powered by plutonium radioisotope thermoelectric generators, I survived the freezing Martian environment and transmitted priceless scientific data for over six full years.",
+      "questions": [
+        {
+          "question": "What historic milestone did Viking 1 Lander achieve upon touching down in July 1976?",
+          "options": [
+            "Transmitted the first clear surface-level photos from Mars",
+            "Discovered active plant life in Martian soil",
+            "Returned soil samples physically back to Earth",
+            "Drilled into subsurface polar ice sheets"
+          ],
+          "correct_answer": "Transmitted the first clear surface-level photos from Mars",
+          "hint": "Viking 1's camera began scanning the landscape just 25 seconds after landing, revealing a boulder-strewn orange-red plain."
+        },
+        {
+          "question": "What power source enabled Viking 1 to endure the frigid Martian nights and dust for over 6 years?",
+          "options": [
+            "Radioisotope Thermoelectric Generators (RTG / Plutonium)",
+            "High-efficiency solar sail panels",
+            "Geothermal thermal taps",
+            "Liquid hydrogen fuel cells"
+          ],
+          "correct_answer": "Radioisotope Thermoelectric Generators (RTG / Plutonium)",
+          "hint": "Two SNAP-19 RTGs used the decay heat of Plutonium-238 to generate electrical power regardless of sunlight or dust storms."
+        }
+      ],
+      "question": "What historic milestone did Viking 1 Lander achieve upon landing?",
+      "options": [
+        "Transmitted the first surface-level photos of Mars",
+        "Discovered active plant life",
+        "Brought soil samples back to Earth"
+      ],
+      "correct_answer": "Transmitted the first surface-level photos of Mars"
+    }
+  ],
+  "moon": [
+    {
+      "id": 3,
+      "code": "M-0",
+      "name": "Apollo 11 Lunar Module (LM) - Eagle",
+      "launch_date": "1969-07-16",
+      "landing_date": "1969-07-20",
+      "image": "images/Picture1___V3.jpg",
+      "story": "I am the Apollo 11 Lunar Module 'Eagle'! Have you ever wondered what humanity's very first footprints beyond Earth look like? I carried the great astronauts Neil Armstrong and Buzz Aldrin to make history as the first humans to land on the Moon at the Sea of Tranquility on July 20, 1969. While Michael Collins piloted the command module Columbia in lunar orbit, Neil expertly maneuvered my descent stage past a boulder-strewn crater with only seconds of fuel remaining. 'Houston, Tranquility Base here. The Eagle has landed.' Neil stepped down my ladder onto the lunar regolith, taking 'one small step for a man, one giant leap for mankind.' Together, they gathered 21.5 kg of lunar samples and deployed scientific experiments before my ascent stage fired to reunite with Columbia. My descent stage remains an eternal monument in the lunar dust.",
+      "questions": [
+        {
+          "question": "Which two astronauts did the Apollo 11 Lunar Module 'Eagle' carry to the surface of the Moon?",
+          "options": [
+            "Neil Armstrong and Buzz Aldrin",
+            "Yuri Gagarin and John Glenn",
+            "Michael Collins and Alan Shepard",
+            "Pete Conrad and Alan Bean"
+          ],
+          "correct_answer": "Neil Armstrong and Buzz Aldrin",
+          "hint": "While these two made history on the lunar surface, their crewmate Michael Collins remained in lunar orbit piloting Columbia."
+        },
+        {
+          "question": "At which lunar landing site did the Apollo 11 Lunar Module touch down on July 20, 1969?",
+          "options": [
+            "Sea of Tranquility (Mare Tranquillitatis)",
+            "Ocean of Storms (Oceanus Procellarum)",
+            "Sea of Serenity (Mare Serenitatis)",
+            "Tycho Crater Basin"
+          ],
+          "correct_answer": "Sea of Tranquility (Mare Tranquillitatis)",
+          "hint": "Neil Armstrong radioed Mission Control with the iconic words: 'Houston, Tranquility Base here. The Eagle has landed.'"
+        }
+      ],
+      "question": "Which astronauts did the Eagle lunar module carry to land on the Moon?",
+      "options": [
+        "Neil Armstrong and Buzz Aldrin",
+        "Yuri Gagarin and John Glenn",
+        "Michael Collins and Alan Shepard"
+      ],
+      "correct_answer": "Neil Armstrong and Buzz Aldrin"
+    },
+    {
+      "id": 4,
+      "code": "M-3",
+      "name": "Apollo 15 Lunar Module (LM) - Falcon",
+      "launch_date": "1971-07-26",
+      "landing_date": "1971-07-30",
+      "image": "images/Picture1___V4.jpg",
+      "story": "I am the 'Falcon' (Apollo 15 Lunar Module), and I made history in the summer of 1971. When I landed on the Moon near the towering Apennine mountain range and the dramatic sinuous canyon of Hadley Rille, I brought an unprecedented revolution to human spaceflight: the very first Lunar Roving Vehicle (LRV) to drive across another celestial world! Thanks to this electric moon buggy, astronauts David Scott and James Irwin didn't just walk near the lander; they drove over 27 kilometers across craters and mountain slopes, collecting over 77 kilograms of precious lunar samples, including the famous 4-billion-year-old 'Genesis Rock.' We also set up the ALSEP nuclear scientific station and conducted Galileo's famous hammer-and-feather gravity drop in the lunar vacuum. It proved that human curiosity can expand beyond any horizon!",
+      "questions": [
+        {
+          "question": "What groundbreaking mobility vehicle did Apollo 15 bring to the Moon for the first time in history?",
+          "options": [
+            "The Lunar Roving Vehicle (LRV moon buggy)",
+            "The autonomous drone flier",
+            "The pressurized lunar camper",
+            "The solar rocket scooter"
+          ],
+          "correct_answer": "The Lunar Roving Vehicle (LRV moon buggy)",
+          "hint": "Nicknamed the 'moon buggy,' this four-wheeled electric rover allowed astronauts to travel kilometers away from the lander."
+        },
+        {
+          "question": "What famous ancient lunar highland rock sample did Apollo 15 astronauts discover at Hadley Delta?",
+          "options": [
+            "The Genesis Rock (anorthosite)",
+            "The Golden Meteorite",
+            "The Titanium Monolith",
+            "The Krypton Crystal"
+          ],
+          "correct_answer": "The Genesis Rock (anorthosite)",
+          "hint": "Sample 15415 is an anorthosite dating back over 4 billion years to the early formation of the Moon's original crust."
+        }
+      ],
+      "question": "What unique vehicle did Apollo 15 Lunar Module bring to the Moon for the first time?",
+      "options": [
+        "First Lunar Roving Vehicle (LRV)",
+        "First autonomous drone",
+        "First solar-powered drill"
+      ],
+      "correct_answer": "First Lunar Roving Vehicle (LRV)"
+    }
+  ],
+  "space": [
+    {
+      "id": 7,
+      "code": "S-1",
+      "name": "James Webb Space Telescope (JWST)",
+      "launch_date": "2021-12-25",
+      "landing_date": "2022-01-24",
+      "image": "images/Picture1___V7.jpg",
+      "story": "I am the James Webb Space Telescope (JWST), the premier space science observatory of the 21st century! Launched on Christmas Day 2021 atop an Ariane 5 rocket, I embarked on a journey to the second Sun-Earth Lagrange point (L2), 1.5 million kilometers away from Earth. To gaze into the dawn of the universe, I unfolded like a cosmic origami: unfurling a five-layer tennis-court-sized sunshield to keep my sensitive instruments colder than -370°F (-223°C), and locking 18 gold-coated beryllium hexagonal mirror segments into one massive 6.5-meter primary reflector. Using my advanced infrared instruments (NIRCam, NIRSpec, MIRI, NIRISS), I pierce through cosmic dust clouds to see the very first stars and galaxies formed after the Big Bang, study the atmospheres of distant exoplanets, and reveal stellar nurseries with unprecedented clarity.",
+      "questions": [
+        {
+          "question": "What wavelength spectrum does the James Webb Space Telescope primarily observe to peer through cosmic dust clouds?",
+          "options": [
+            "Infrared light",
+            "Ultraviolet light",
+            "Gamma rays",
+            "Visible light only"
+          ],
+          "correct_answer": "Infrared light",
+          "hint": "Because the universe is expanding, light from the earliest stars is redshifted into infrared wavelengths invisible to the human eye."
+        },
+        {
+          "question": "At what special orbital location, 1.5 million kilometers beyond Earth, is JWST stationed?",
+          "options": [
+            "Sun-Earth L2 Lagrange Point",
+            "Low Earth Orbit (LEO)",
+            "Geostationary Transfer Orbit",
+            "Lunar Gateway Orbit"
+          ],
+          "correct_answer": "Sun-Earth L2 Lagrange Point",
+          "hint": "This gravitational equilibrium point keeps Earth and the Sun aligned behind JWST's sunshield at all times."
+        }
+      ],
+      "question": "What wavelength spectrum does the James Webb Space Telescope primarily observe?",
+      "options": [
+        "Infrared light",
+        "Ultraviolet light",
+        "Gamma rays"
+      ],
+      "correct_answer": "Infrared light"
+    },
+    {
+      "id": 8,
+      "code": "S-2",
+      "name": "Voyager 1",
+      "launch_date": "1977-09-05",
+      "landing_date": "2012-08-25",
+      "image": "images/Picture1___V8.jpg",
+      "story": "I am Voyager 1, humanity's farthest emissary in the cosmos. Launched in 1977 on a grand tour of our solar system, I captured breathtaking close-up images of Jupiter's swirling storms and discovered active volcanic plumes on Io. Next, I raced past Saturn, unveiling intricate ringlet structures and examining Titan's dense nitrogen atmosphere. In 1990, at the request of astronomer Carl Sagan, I turned my camera back toward home one final time to capture the 'Pale Blue Dot'—Earth appearing as a tiny speck of dust suspended in a sunbeam. On August 25, 2012, I crossed the heliopause and became the first human-made object to enter interstellar space. Bolted to my chassis is the Golden Record: a gold-plated copper phonograph containing greetings in 55 languages, sounds of thunder and birds, and music from Earth, voyaging forever across the Milky Way.",
+      "questions": [
+        {
+          "question": "What historic milestone did Voyager 1 achieve in August 2012?",
+          "options": [
+            "Became the first human-made object to enter interstellar space",
+            "Landed safely on Jupiter's moon Europa",
+            "Entered orbit around Pluto",
+            "Returned physical soil samples from Saturn's rings"
+          ],
+          "correct_answer": "Became the first human-made object to enter interstellar space",
+          "hint": "Voyager 1 crossed the heliopause—the outer boundary where the Sun's solar wind gives way to the interstellar medium of the galaxy."
+        },
+        {
+          "question": "What famous message to the cosmos is bolted to the exterior chassis of Voyager 1?",
+          "options": [
+            "The Golden Record (sounds, music, and images of Earth)",
+            "A digital quantum computer",
+            "A titanium encyclopedia",
+            "A laser homing beacon"
+          ],
+          "correct_answer": "The Golden Record (sounds, music, and images of Earth)",
+          "hint": "Chaired by Carl Sagan, the committee compiled a 12-inch gold-plated copper disc designed to last over a billion years in space."
+        }
+      ],
+      "question": "What historic milestone did Voyager 1 achieve in August 2012?",
+      "options": [
+        "Became the first human-made object to enter interstellar space",
+        "Landed safely on Europa",
+        "Entered orbit around Pluto"
+      ],
+      "correct_answer": "Became the first human-made object to enter interstellar space"
+    },
+    {
+      "id": 9,
+      "code": "S-3",
+      "name": "Parker Solar Probe",
+      "launch_date": "2018-08-12",
+      "landing_date": "2021-12-14",
+      "image": "images/Picture1___V9.jpg",
+      "story": "I am the Parker Solar Probe, humanity's audacious mission to 'touch the Sun'! Launched in 2018, I am the fastest human-made object in history, using repetitive gravity assists from Venus to slingshot around the Sun at mind-boggling speeds of up to 430,000 miles per hour (700,000 km/h). On December 14, 2021, I made history by crossing the Alfvén critical surface to officially enter the Sun's outer atmosphere—the solar corona. To survive temperatures reaching over 2,500°F (1,400°C) while flying through plasma, I am shielded by an 8-foot (2.4-meter) cutting-edge carbon-composite heat shield that keeps my delicate scientific instruments at a comfortable 85°F (30°C). By flying directly through magnetic switchbacks and coronal mass ejections, I am solving decade-old mysteries of how the solar wind is accelerated and why the corona is hundreds of times hotter than the Sun's visible surface.",
+      "questions": [
+        {
+          "question": "What extreme celestial region did the Parker Solar Probe fly directly through to 'touch the Sun'?",
+          "options": [
+            "The Solar Corona (Sun's outer atmosphere)",
+            "The Sun's nuclear core",
+            "The Kuiper Belt",
+            "Mercury's core mantle"
+          ],
+          "correct_answer": "The Solar Corona (Sun's outer atmosphere)",
+          "hint": "Flying within just a few million miles of the photosphere, Parker dipped below the Alfvén critical surface directly into the corona."
+        },
+        {
+          "question": "What revolutionary thermal technology protects Parker Solar Probe's instruments from 2,500°F solar heat?",
+          "options": [
+            "Carbon-composite foam thermal protection shield",
+            "Liquid nitrogen active cooling jacket",
+            "Heavy lead and tungsten hull plating",
+            "Water ice deflection reflectors"
+          ],
+          "correct_answer": "Carbon-composite foam thermal protection shield",
+          "hint": "The 4.5-inch-thick carbon foam shield sandwiched between carbon-fiber plates keeps instruments behind it at room temperature."
+        }
+      ],
+      "question": "What extreme celestial region does the Parker Solar Probe study up close?",
+      "options": [
+        "The Solar Corona",
+        "The Sun's nuclear core",
+        "The Kuiper Belt"
+      ],
+      "correct_answer": "The Solar Corona"
+    }
+  ]
+}

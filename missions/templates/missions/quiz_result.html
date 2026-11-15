@@ -1,0 +1,44 @@
+{% extends 'missions/base.html' %}
+{% block title %}Exam result · {{ vehicle.name }}{% endblock %}
+{% block content %}
+<div class="result">
+  <nav class="crumbs"><a href="{% url 'home' %}">Hub</a> / <a href="{{ vehicle.get_absolute_url }}">{{ vehicle.name }}</a> / <span>Result</span></nav>
+  {% if attempt.passed %}
+  <section class="panel result--pass">
+    <div class="badge-big" style="color:var(--green)">🏅 MISSION SUCCESS</div>
+    <div class="ring" style="--pct:{{ attempt.score_percent }};--ring:var(--green)"><span>{{ attempt.score_percent }}%</span></div>
+    <p>{{ attempt.correct_count }} of {{ attempt.total_questions }} correct. You cleared the {{ attempt.pass_percent }}% pass mark for <strong>{{ vehicle.name }}</strong>.</p>
+    <p><strong>NASA Explorer Certificate unlocked.</strong></p>
+    <div class="actions">
+      {% if certificate %}
+      <a class="btn btn--success" href="{% url 'certificate_download' certificate.code %}">⬇ Download certificate</a>
+      <a class="btn" href="{% url 'certificate' %}?mission={{ vehicle.slug }}">View certificate</a>
+      {% endif %}
+      <a class="btn" href="{% url 'home' %}">Next mission</a>
+    </div>
+  </section>
+  {% else %}
+  <section class="panel result--fail">
+    <div class="badge-big" style="color:var(--red)">⚠ TELEMETRY LOST</div>
+    <div class="ring" style="--pct:{{ attempt.score_percent }};--ring:var(--red)"><span>{{ attempt.score_percent }}%</span></div>
+    <p>You answered {{ attempt.correct_count }} of {{ attempt.total_questions }} correctly. The pass mark is {{ attempt.pass_percent }}%, so this signal didn't make it home.</p>
+    <p class="muted">Re-read the mission log, check the hints below, then try again. Every launch teaches something.</p>
+    <div class="actions">
+      <a class="btn btn--danger" href="{% url 'vehicle_quiz' vehicle.slug %}">🔄 Retake Exam</a>
+      <a class="btn" href="{{ vehicle.get_absolute_url }}">Re-read the story</a>
+    </div>
+  </section>
+  {% endif %}
+  <div class="review" aria-label="Answer review">
+    {% for r in review %}
+    <div class="item {% if r.ok %}ok{% else %}bad{% endif %}">
+      <strong>{{ forloop.counter }}. {{ r.question.text }}</strong>
+      <div style="margin-top:6px">{% if r.ok %}✅{% else %}❌{% endif %} Your answer: {{ r.selected.text|default:"No answer" }}</div>
+      {% if r.correct and not r.ok %}<div>Correct answer: {{ r.correct.text }}</div>{% endif %}
+      {% if r.hint %}<p class="hint">💡 Hint: {{ r.hint }}</p>{% endif %}
+      {% if attempt.passed and r.question.explanation %}<p class="muted">{{ r.question.explanation }}</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

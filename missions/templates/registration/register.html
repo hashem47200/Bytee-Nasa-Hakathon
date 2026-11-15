@@ -1,0 +1,14 @@
+{% extends 'missions/base.html' %}
+{% block title %}Join the crew · NASA Explorer Hub{% endblock %}
+{% block content %}
+<section class="panel form-card">
+  <h1>Join the crew</h1>
+  <form method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for f in form %}<label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<small>{{ f.help_text|safe }}</small>{% endif %}{{ f.errors }}{% endfor %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn--primary" style="width:100%;margin-top:20px" type="submit">Create account</button>
+  </form>
+  <p class="muted" style="margin-top:16px">Already registered? <a href="{% url 'login' %}">Log in</a></p>
+</section>
+{% endblock %}

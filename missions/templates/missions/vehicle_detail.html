@@ -1,0 +1,51 @@
+{% extends 'missions/base.html' %}{% load static %}
+{% block title %}{{ vehicle.name }} · NASA Explorer Hub{% endblock %}
+{% block description %}{{ vehicle.tagline }}{% endblock %}
+{% block content %}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="{% url 'home' %}">Hub</a> / <a href="{% url 'home' %}#{{ category.slug }}">{{ category.name }}</a> / <span>{{ vehicle.name }}</span></nav>
+
+<section class="scene {% if deep_space %}scene--deep{% endif %}" {% if category.texture_image %}style="--scene-img:url('{% static category.texture_image %}')"{% endif %}>
+  <div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="chip {% if deep_space %}chip--violet{% else %}chip--cyan{% endif %}">{{ category.icon }} {{ category.name }}</span>
+      {% if vehicle.mission_type %}<span class="chip">{{ vehicle.mission_type }}</span>{% endif %}
+      {% if vehicle.status_label %}<span class="chip chip--ok">{{ vehicle.status_label }}</span>{% endif %}
+    </div>
+    <h1>{{ vehicle.name }}</h1>
+    {% if vehicle.tagline %}<p class="tagline">{{ vehicle.tagline }}</p>{% endif %}
+  </div>
+  <figure class="scene__fig">
+    <img src="{% if vehicle.image_path %}{% static vehicle.image_path %}{% else %}{% static 'images/placeholder.svg' %}{% endif %}" alt="{{ vehicle.name }}" onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}';">
+  </figure>
+</section>
+
+<div class="cols">
+  <article class="panel story">
+    <h2>{% if deep_space %}MISSION LOG{% else %}MISSION NARRATIVE{% endif %}</h2>
+    {% for s in vehicle.stories.all %}
+      {% if s.title and vehicle.stories.all|length > 1 %}<h3>{{ s.title }}</h3>{% endif %}
+      {{ s.content|linebreaks }}
+    {% empty %}<p class="muted">The story for this mission is being written.</p>{% endfor %}
+  </article>
+  <aside class="panel specs">
+    <h2>SPEC SHEET</h2>
+    <dl class="spec">
+      <div><dt>Mission code</dt><dd>{{ vehicle.code }}</dd></div>
+      {% if vehicle.launch_date %}<div><dt>Launched</dt><dd>{{ vehicle.launch_date|date:"j M Y" }}</dd></div>{% endif %}
+      {% if vehicle.landing_date %}<div><dt>{{ vehicle.milestone_label }}</dt><dd>{{ vehicle.landing_date|date:"j M Y" }}</dd></div>{% endif %}
+      {% if vehicle.coordinates %}<div><dt>{{ vehicle.location_label }}</dt><dd>{{ vehicle.coordinates }}</dd></div>{% endif %}
+      {% for s in vehicle.specs.all %}<div><dt>{{ s.label }}</dt><dd>{{ s.value }}</dd></div>{% endfor %}
+    </dl>
+  </aside>
+</div>
+
+<section class="panel cta">
+  <h2>Ready for your mission exam?</h2>
+  <p class="muted">{{ question_total }} question{{ question_total|pluralize }} · score {{ pass_percent }}% or higher to earn your NASA Explorer Certificate</p>
+  {% if question_total %}
+    <a class="btn btn--launch" href="{% url 'vehicle_quiz' vehicle.slug %}">Launch Mission Exam 🚀</a>
+    {% if not user.is_authenticated %}<p class="muted" style="margin:14px 0 0"><small>You'll be asked to log in so your certificate carries your name.</small></p>{% endif %}
+  {% else %}<p>No exam questions yet for this mission. Check back soon.</p>{% endif %}
+  {% if certificate %}<p style="margin-top:18px"><span class="chip chip--ok">✓ Certified {{ certificate.score_percent }}%</span> <a href="{% url 'certificate' %}?mission={{ vehicle.slug }}">View your certificate</a></p>{% endif %}
+</section>
+{% endblock %}
