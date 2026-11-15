@@ -1,6 +1,6 @@
 {% extends 'missions/base.html' %}{% load static %}
-{% block title %}NASA Missions Relational Database · NASA Explorer Hub{% endblock %}
-{% block description %}Explore the complete NASA mission dataset imported from the relational database with search, filters, and column sorting.{% endblock %}
+{% block title %}Bytee Missions Relational Database · Bytee Explorer Hub{% endblock %}
+{% block description %}Explore the authentic Bytee mission dataset imported from the relational database with search, filters, and column sorting.{% endblock %}
 
 {% block content %}
 <section class="db-header-section">
@@ -17,12 +17,12 @@
         </span>
         <span class="db-count-label">{{ total_count }} total records</span>
       </div>
-      <h1 class="db-title">NASA <span class="cyan-glow">Relational Records</span></h1>
-      <p class="db-subtitle">Explore the normalized records parsed and imported from the desktop NASA dataset. Search, filter by domain, or sort by telemetry columns.</p>
+      <h1 class="db-title">Bytee <span class="cyan-glow">Relational Records</span></h1>
+      <p class="db-subtitle">Explore the normalized records parsed and imported from the authentic NASA dataset (13 missions to Mars and the Moon). Search, filter by domain, or sort by telemetry columns.</p>
     </div>
     <div class="db-header-actions">
       <a class="btn btn--cyan-glow" href="{% url 'data_json' %}" target="_blank">View JSON API ↗</a>
-      <a class="btn btn--dark-pill" href="{% url 'home' %}">← Mission Hub</a>
+      <a class="btn btn--dark-pill" href="{% url 'home' %}">← 3D Mission Hub</a>
     </div>
   </div>
 </section>
@@ -50,7 +50,7 @@
       <div class="form-group">
         <label for="dbCat" class="db-form-label">Domain / Category</label>
         <select id="dbCat" name="cat" class="db-select" onchange="this.form.submit()">
-          <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Domains (Mars, Moon, Space)</option>
+          <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Domains (Mars, Moon)</option>
           {% for c in categories %}
             <option value="{{ c.slug }}" {% if selected_category == c.slug %}selected{% endif %}>{{ c.name }}</option>
           {% endfor %}
@@ -91,7 +91,7 @@
 {% if vehicles %}
 <div class="panel db-table-card">
   <div class="table-responsive" id="dbTableResponsive">
-    <table class="db-table" aria-label="NASA Mission Database">
+    <table class="db-table" aria-label="Bytee Mission Database">
       <thead>
         <tr>
           <th style="width:110px">Code</th>
@@ -100,7 +100,7 @@
               Vehicle Name {% if sort_by == 'name' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% else %}▼{% endif %}
             </a>
           </th>
-          <th style="width:120px">Category</th>
+          <th style="width:130px">Category / Type</th>
           <th style="width:130px">
             <a href="?sort=launch&dir={% if sort_by == 'launch' and direction == 'asc' %}desc{% else %}asc{% endif %}{% if query %}&q={{ query }}{% endif %}{% if selected_category != 'all' %}&cat={{ selected_category }}{% endif %}" class="table-sort-link">
               Launch Date {% if sort_by == 'launch' %}{% if direction == 'desc' %}▼{% else %}▲{% endif %}{% endif %}
@@ -127,10 +127,12 @@
             </div>
           </td>
           <td>
-            {% if v.category.slug == 'space' %}
-              <span class="cat-pill cat-pill--space"><span class="cat-dot dot-space"></span> SPACE</span>
-            {% elif v.category.slug == 'mars' %}
-              <span class="cat-pill cat-pill--mars"><span class="cat-dot dot-mars"></span> MARS</span>
+            {% if v.category.slug == 'mars' %}
+              {% if v.is_nearby_space %}
+                <span class="cat-pill cat-pill--orbit"><span class="cat-dot dot-orbit"></span> MARS (ORBIT)</span>
+              {% else %}
+                <span class="cat-pill cat-pill--mars"><span class="cat-dot dot-mars"></span> MARS</span>
+              {% endif %}
             {% else %}
               <span class="cat-pill cat-pill--moon"><span class="cat-dot dot-moon"></span> MOON</span>
             {% endif %}
@@ -151,7 +153,7 @@
           </td>
           <td>
             <span class="coord-box" title="{{ v.coordinates|default:v.raw_location }}">
-              {{ v.coordinates|default:v.raw_location|default:"Deep Space"|truncatechars:32 }}
+              {{ v.coordinates|default:v.raw_location|default:"Surface Site"|truncatechars:32 }}
             </span>
           </td>
           <td style="text-align:center">
@@ -167,7 +169,7 @@
     </table>
   </div>
 
-  <!-- Table Horizontal Navigation Bar (Reference Image 6) -->
+  <!-- Table Horizontal Navigation Bar -->
   <div class="table-scroll-track-wrap">
     <button type="button" class="scroll-arrow scroll-arrow-left" id="scrollLeftBtn" aria-label="Scroll left">&#9664;</button>
     <div class="scroll-track" id="scrollTrack">

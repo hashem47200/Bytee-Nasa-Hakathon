@@ -1,120 +1,156 @@
 import json
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from django.urls import reverse
 from django.utils.html import escape
 
-from missions.models import Category, Vehicle, Question, Answer, QuizAttempt, Certificate, UserProgress
-from missions.services import grade, record_attempt
+from missions.models import Category, Vehicle, Question, Answer, QuizAttempt, Certificate, UserProgress, pass_percent
+from missions.services import grade, record_attempt, calculate_user_celestial_progress
 
 User = get_user_model()
 
 
-class NASAExplorerHubOverhaulTests(TestCase):
+class ByteeRestorationAndIntegrityTests(TestCase):
     def setUp(self):
         self.client = Client()
-        call_command('import_excel_data')
+        # Seed test database with authentic importer
+        from scripts.import_nasa import run_import
+        run_import()
+
         self.user = User.objects.create_user(
-            username='ExplorerOne',
-            email='explorer@nasa.gov',
+            username='CommanderBytee',
+            email='commander@bytee.space',
             password='SafePassword123'
         )
-        UserProgress.objects.create(user=self.user)
+        self.progress, _ = UserProgress.objects.get_or_create(user=self.user)
 
-    def test_categories_and_deep_space_distinction(self):
-        """Mars and Moon must be planetary; Space must be framed as deep space without surfaces."""
-        cats = {c.slug: c for c in Category.objects.all()}
+    def test_authentic_dataset_integrity(self):
+        """Database must strictly contain the 13 authentic vehicles from nasa_data.xlsx."""
+        self.assertEqual(Vehicle.objects.count(), 13)
+
+        # 2 Categories only: Mars and Moon
+        cats = list(Category.objects.values_list('slug', flat=True))
         self.assertIn('mars', cats)
         self.assertIn('moon', cats)
-        self.assertIn('space', cats)
+        self.assertNotIn('space', cats)
 
-        self.assertFalse(cats['mars'].is_deep_space)
-        self.assertFalse(cats['moon'].is_deep_space)
-        self.assertTrue(cats['space'].is_deep_space)
-        self.assertEqual(cats['space'].kind, 'deep_space')
+        # 4 Moon missions (all surface)
+        moon_vehicles = Vehicle.objects.filter(category__slug='moon')
+        self.assertEqual(moon_vehicles.count(), 4)
+        for v in moon_vehicles:
+            self.assertFalse(v.is_nearby_space)
 
-        # Deep space vehicles
-        space_vehicles = cats['space'].vehicles.all()
-        self.assertTrue(space_vehicles.filter(slug='james-webb-space-telescope').exists())
-        self.assertTrue(space_vehicles.filter(slug='voyager-1').exists())
-        self.assertTrue(space_vehicles.filter(slug='parker-solar-probe').exists())
-        self.assertTrue(space_vehicles.filter(slug='kepler-space-telescope').exists())
-        self.assertTrue(space_vehicles.filter(slug='dawn-mission').exists())
+        # 9 Mars missions (5 surface, 4 nearby-space)
+        mars_vehicles = Vehicle.objects.filter(category__slug='mars')
+        self.assertEqual(mars_vehicles.count(), 9)
+        self.assertEqual(mars_vehicles.filter(is_nearby_space=False).count(), 5)
+        self.assertEqual(mars_vehicles.filter(is_nearby_space=True).count(), 4)
 
-    def test_every_vehicle_has_two_dynamic_questions(self):
-        """Every vehicle must have exactly 2 dynamically extensible questions."""
-        for v in Vehicle.objects.filter(is_published=True):
-            self.assertEqual(
-                v.questions.count(), 2,
-                f"Vehicle {v.name} ({v.slug}) has {v.questions.count()} questions instead of 2."
+        # Zero synthetic craft
+        synthetic_slugs = [
+            'james-webb-space-telescope', 'hubble-space-telescope',
+            'voyager-1', 'voyager-2', 'parker-solar-probe'
+        ]
+        for slug in synthetic_slugs:
+            self.assertFalse(
+                Vehicle.objects.filter(slug=slug).exists(),
+                f"Synthetic craft {slug} should have been purged from database."
             )
-            for q in v.questions.all():
-                self.assertGreaterEqual(q.answers.count(), 2)
-                self.assertTrue(q.answers.filter(is_correct=True).exists())
 
-    def test_home_page_rendering(self):
-        """Home page must render with categories, stats, and shareable toggle bar."""
-        resp = self.client.get(reverse('home'))
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "Mission")
-        self.assertContains(resp, "Control")
-        self.assertContains(resp, "Hub")
-        self.assertContains(resp, "Mars")
-        self.assertContains(resp, "Moon")
-        self.assertContains(resp, "Space")
+    def test_strict_100_percent_pass_requirement(self):
+        """Pass mark must be 100%. Any score below 100% must fail and not count."""
+        self.assertEqual(pass_percent(), 100)
+        v = Vehicle.objects.filter(category__slug='moon').first()
+        questions = list(v.questions.prefetch_related('answers').all())
+        self.assertGreaterEqual(len(questions), 2)
 
-    def test_vehicle_editorial_page(self):
-        """Vehicle story page must render specs, narrative, and 'Launch Mission Exam 🚀' CTA."""
-        v = Vehicle.objects.get(slug='apollo-11-eagle')
-        resp = self.client.get(reverse('vehicle_detail', kwargs={'slug': v.slug}))
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "Launch Mission Exam")
-        self.assertContains(resp, escape(v.name))
+        # 1 correct, 1 wrong -> 50% score
+        q1 = questions[0]
+        q2 = questions[1]
+        correct_ans = q1.answers.filter(is_correct=True).first()
+        wrong_ans = q2.answers.filter(is_correct=False).first()
 
-    def test_quiz_exam_threshold_60_percent_fail(self):
-        """Scoring below 60% must display telemetry failure message and 'Retake Exam' button."""
-        v = Vehicle.objects.get(slug='apollo-11-eagle')
-        self.client.force_login(self.user)
-        questions = list(v.questions.prefetch_related('answers').all().order_by('order', 'id'))
+        selections = {q1.id: correct_ans.id, q2.id: wrong_ans.id}
+        result = grade(v, selections)
+        self.assertEqual(result.percent, 50)
+        self.assertFalse(result.passed)
 
-        # Select wrong answers -> 0%
-        wrong_data = {}
-        for q in questions:
-            wrong_ans = q.answers.filter(is_correct=False).first()
-            wrong_data[f'q_{q.id}'] = wrong_ans.id
+        attempt, cert = record_attempt(self.user, v, result)
+        self.assertFalse(attempt.passed)
+        self.assertIsNone(cert)
 
-        resp = self.client.post(reverse('vehicle_quiz', kwargs={'slug': v.slug}), data=wrong_data)
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "TELEMETRY LOST")
-        self.assertContains(resp, "Retake Exam")
+    def test_100_percent_full_mark_advances_progress(self):
+        """100% full-mark exam advances celestial progress."""
+        v = Vehicle.objects.filter(category__slug='moon').first()
+        questions = list(v.questions.prefetch_related('answers').all())
 
-        # Certificate must NOT be issued
-        self.assertFalse(Certificate.objects.filter(user=self.user, vehicle=v).exists())
+        selections = {
+            q.id: q.answers.filter(is_correct=True).first().id
+            for q in questions
+        }
+        result = grade(v, selections)
+        self.assertEqual(result.percent, 100)
+        self.assertTrue(result.passed)
 
-    def test_quiz_exam_threshold_60_percent_pass_and_certificate(self):
-        """Scoring >= 60% must unlock mission success badge and issue personalized certificate."""
-        v = Vehicle.objects.get(slug='apollo-11-eagle')
-        self.client.force_login(self.user)
-        questions = list(v.questions.prefetch_related('answers').all().order_by('order', 'id'))
+        attempt, cert = record_attempt(self.user, v, result)
+        self.assertTrue(attempt.passed)
 
-        # Select correct answers -> 100%
-        correct_data = {}
-        for q in questions:
-            corr_ans = q.answers.filter(is_correct=True).first()
-            correct_data[f'q_{q.id}'] = corr_ans.id
+        # Check celestial progress (1 of 4 Moon vehicles = 25%)
+        stats = calculate_user_celestial_progress(self.user)
+        self.assertEqual(stats['moon_passed'], 1)
+        self.assertEqual(stats['moon_total'], 4)
+        self.assertEqual(stats['moon_percent'], 25)
+        self.assertEqual(stats['mars_percent'], 0)  # Mars remains independent
 
-        resp = self.client.post(reverse('vehicle_quiz', kwargs={'slug': v.slug}), data=correct_data)
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "MISSION SUCCESS")
+    def test_moon_certificate_unlocks_at_100_percent_completion(self):
+        """Moon Certificate of Exploration is issued when all 4 Moon vehicle exams achieve 100%."""
+        moon_vehicles = list(Vehicle.objects.filter(category__slug='moon'))
+        self.assertEqual(len(moon_vehicles), 4)
 
-        # Certificate must be created
-        cert = Certificate.objects.filter(user=self.user, vehicle=v).first()
+        for v in moon_vehicles:
+            questions = list(v.questions.prefetch_related('answers').all())
+            selections = {q.id: q.answers.filter(is_correct=True).first().id for q in questions}
+            res = grade(v, selections)
+            record_attempt(self.user, v, res)
+
+        stats = calculate_user_celestial_progress(self.user)
+        self.assertEqual(stats['moon_percent'], 100)
+        self.assertTrue(stats['moon_certified'])
+
+        # Certificate created in DB
+        cert = Certificate.objects.filter(user=self.user, body_name='Moon').first()
         self.assertIsNotNone(cert)
+        self.assertEqual(cert.title, 'Moon Certificate of Exploration')
         self.assertEqual(cert.score_percent, 100)
 
-        # PDF download must stream valid PDF
-        pdf_resp = self.client.get(reverse('certificate_download', kwargs={'code': cert.code}))
-        self.assertEqual(pdf_resp.status_code, 200)
-        self.assertEqual(pdf_resp['Content-Type'], 'application/pdf')
-        self.assertTrue(pdf_resp.content.startswith(b'%PDF'))
+    def test_home_page_renders_bytee_3d_hub(self):
+        """Home page must render 3D controls, dual progress bars, and zero flat cards grid."""
+        resp = self.client.get(reverse('home'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Bytee")
+        self.assertContains(resp, "Mars Exploration Progress")
+        self.assertContains(resp, "Moon Exploration Progress")
+        self.assertContains(resp, "planet-canvas-container")
+        self.assertContains(resp, "vehicle-modal")
+        # Ensure old flat card grid is removed
+        self.assertNotContains(resp, "missions-grid")
+
+    def test_relational_database_view_shows_13_records(self):
+        """Relational database table view must show exactly 13 records with Bytee branding."""
+        resp = self.client.get(reverse('dataset_explorer'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Bytee")
+        self.assertContains(resp, "13 total records")
+        self.assertNotContains(resp, "18 total records")
+        self.assertNotContains(resp, "Voyager 1")
+        self.assertNotContains(resp, "Parker Solar Probe")
+
+    def test_certificate_page_rendering(self):
+        """Certificate page must render Mars and Moon celestial credentials without individual vehicle cards."""
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('certificate'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Bytee")
+        self.assertContains(resp, "Mars Certificate")
+        self.assertContains(resp, "Moon Certificate")
+        self.assertNotContains(resp, "missions certified")

@@ -1,56 +1,190 @@
 {% extends 'missions/base.html' %}{% load static %}
-{% block title %}NASA Missions Hub · NASA Explorer Hub{% endblock %}
+{% block title %}Bytee 3D Mission Control · Mars & Moon Interactive Exploration{% endblock %}
 
 {% block content %}
-<div class="hub-view-container" aria-label="Mission Control Hub">
-  <span class="sr-only">Mission Control Hub</span>
+<div class="bytee-hub" aria-label="Bytee 3D Mission Control">
 
-  <!-- Category Toggle Filter Bar -->
-  <div class="toggle-bar" role="tablist" aria-label="Mission categories">
-    <button class="toggle is-active" role="tab" data-filter="all" aria-selected="true" data-desc="Every mission in the hub.">
-      All missions <span class="count">{{ total }}</span>
-    </button>
-    {% for cat in categories %}
-    <button class="toggle" role="tab" data-filter="{{ cat.slug }}" aria-selected="false" data-desc="{{ cat.description }}">
-      <span class="toggle-icon">{{ cat.icon }}</span> {{ cat.name }} <span class="count">{{ cat.total }}</span>
-    </button>
-    {% endfor %}
-  </div>
-
-  <p class="missions-subtitle" id="blurb" aria-live="polite">Every mission in the hub.</p>
-
-  <!-- 3-Column Mission Card Grid -->
-  <div class="grid missions-grid">
-    {% for cat in categories %}
-      {% for v in cat.card_list %}
-      <a class="card {% if cat.is_deep_space %}card--deep{% endif %}" href="{{ v.get_absolute_url }}" data-category="{{ cat.slug }}">
-        <div class="card__img">
-          <img src="{% if v.image_path %}{% static v.image_path %}{% else %}{% static 'images/placeholder.svg' %}{% endif %}" alt="{{ v.name }}" loading="lazy" onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}';">
-          <span class="card-badge card-badge--{{ cat.slug }}">
-            <span class="badge-dot dot-{{ cat.slug }}"></span> {{ cat.name|upper }}
-          </span>
-        </div>
-        <div class="card__body">
-          <h3>{{ v.name }}</h3>
-          <p>{{ v.tagline|default:v.mission_type }}</p>
-          <div class="card__foot">
-            <span class="foot-questions">2 questions</span>
-            {% if v.certificate %}
-              <span class="status-btn status-btn--certified">✓ CERTIFIED 100%</span>
-            {% elif v.best_score is not None and v.best_score >= 60 %}
-              <span class="status-btn status-btn--certified">✓ CERTIFIED {{ v.best_score }}%</span>
+  <!-- Dual Independent Progress Bars (Mars & Moon) -->
+  <section class="panel dual-progress-panel">
+    <div class="dual-progress-grid">
+      <!-- Mars Exploration Progress -->
+      <div class="progress-card progress-card--mars">
+        <div class="progress-card-head">
+          <div class="progress-title-row">
+            <span class="body-icon">🔴</span>
+            <div>
+              <h3>Mars Exploration Progress</h3>
+              <p class="muted">5 Surface Landers/Rovers + 4 Orbital Probes · 100% Exam Pass Required</p>
+            </div>
+          </div>
+          <div class="progress-badge-wrap">
+            <span class="progress-val">{{ mars_stats.mars_percent }}%</span>
+            {% if mars_stats.mars_certified %}
+              <span class="cert-status-pill cert-status-pill--done">🏆 Mars Certified</span>
             {% else %}
-              <span class="status-btn status-btn--unattempted">NOT ATTEMPTED</span>
+              <span class="cert-status-pill">Locked</span>
             {% endif %}
           </div>
         </div>
-      </a>
-      {% endfor %}
-    {% endfor %}
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--mars" style="width: {{ mars_stats.mars_percent }}%;"></div>
+        </div>
+        <div class="progress-card-foot">
+          <span>{{ mars_stats.mars_passed }} of {{ mars_stats.mars_total }} missions passed</span>
+          {% if mars_stats.mars_certified %}
+            <a href="{% url 'certificate' %}?body=mars" class="cert-link">View Mars Certificate →</a>
+          {% else %}
+            <span class="cert-hint">100% required for Mars Certificate</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Moon Exploration Progress -->
+      <div class="progress-card progress-card--moon">
+        <div class="progress-card-head">
+          <div class="progress-title-row">
+            <span class="body-icon">🌕</span>
+            <div>
+              <h3>Moon Exploration Progress</h3>
+              <p class="muted">4 Historical Apollo & Robotic Surface Missions · 100% Exam Pass Required</p>
+            </div>
+          </div>
+          <div class="progress-badge-wrap">
+            <span class="progress-val">{{ moon_stats.moon_percent }}%</span>
+            {% if moon_stats.moon_certified %}
+              <span class="cert-status-pill cert-status-pill--done">🏆 Moon Certified</span>
+            {% else %}
+              <span class="cert-status-pill">Locked</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--moon" style="width: {{ moon_stats.moon_percent }}%;"></div>
+        </div>
+        <div class="progress-card-foot">
+          <span>{{ moon_stats.moon_passed }} of {{ moon_stats.moon_total }} missions passed</span>
+          {% if moon_stats.moon_certified %}
+            <a href="{% url 'certificate' %}?body=moon" class="cert-link">View Moon Certificate →</a>
+          {% else %}
+            <span class="cert-hint">100% required for Moon Certificate</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive 3D Planet Exploration Hub -->
+  <section class="panel viewer-3d-panel">
+    <!-- Top HUD Toolbar -->
+    <div class="viewer-hud-header">
+      <div class="hud-left">
+        <span class="hud-badge"><span class="pulse-beacon"></span> 3D CELESTIAL TELEMETRY</span>
+        <div class="planet-switcher-group" role="tablist" aria-label="Celestial Body Switcher">
+          <button type="button" class="btn-planet is-active" data-planet-toggle="mars" id="btn-planet-mars">
+            <span class="btn-planet-dot dot-mars"></span> Mars System (9)
+          </button>
+          <button type="button" class="btn-planet" data-planet-toggle="moon" id="btn-planet-moon">
+            <span class="btn-planet-dot dot-moon"></span> Lunar Surface (4)
+          </button>
+        </div>
+      </div>
+
+      <div class="hud-controls">
+        <button type="button" class="hud-btn" id="btn-spin-toggle" title="Pause or resume auto-rotation">
+          <span id="spin-icon">⏸</span> <span id="spin-text">Pause</span>
+        </button>
+        <button type="button" class="hud-btn hud-btn--icon" id="btn-zoom-in" title="Zoom in">+</button>
+        <button type="button" class="hud-btn hud-btn--icon" id="btn-zoom-out" title="Zoom out">−</button>
+        <button type="button" class="hud-btn" id="btn-reset-view" title="Reset view and camera angle">
+          🎯 Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- 3D Viewport and Sidebar Container -->
+    <div class="viewer-layout">
+      <!-- 3D Canvas Area -->
+      <div class="viewer-canvas-wrap" id="planet-canvas-container">
+        <!-- Floating Tooltip -->
+        <div id="planet-tooltip" class="planet-tooltip" style="display:none;"></div>
+
+        <!-- In-Scene Controls Overlay -->
+        <div class="viewer-canvas-overlay">
+          <div class="viewer-legend">
+            <span class="legend-item"><span class="legend-marker marker--surface"></span> Surface Vehicle</span>
+            <span class="legend-item"><span class="legend-marker marker--orbit"></span> Nearby-Space Probe</span>
+          </div>
+          <div class="viewer-hint">Drag to rotate · Scroll or pinch to zoom · Click marker to inspect</div>
+        </div>
+      </div>
+
+      <!-- Telemetry Mission List Sidebar -->
+      <aside class="viewer-sidebar">
+        <div class="sidebar-header">
+          <h4 id="planet-sidebar-title">Martian Vehicles & Telemetry</h4>
+          <span class="sidebar-count" id="planet-vehicle-count">9 Beacons</span>
+        </div>
+        <p class="sidebar-desc" id="planet-view-desc">
+          Interactive surface landing sites and orbital telemetry beacons. Click any vehicle to inspect in-scene.
+        </p>
+        <div class="sidebar-scroll" id="planet-sidebar-missions">
+          <!-- Populated dynamically by planet_3d.js -->
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- In-Scene Vehicle Information Window (Modal) -->
+  <div id="vehicle-modal" class="modal-backdrop" aria-hidden="true" style="display:none;">
+    <div class="modal-card" role="dialog" aria-labelledby="modal-vehicle-name">
+      <button type="button" class="modal-close-btn" id="modal-close" aria-label="Close window">×</button>
+      <div class="modal-grid">
+        <div class="modal-img-col">
+          <img id="modal-vehicle-img" src="{% static 'images/placeholder.svg' %}" alt="Vehicle" onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}';">
+          <span class="modal-type-badge" id="modal-vehicle-type">SURFACE VEHICLE</span>
+        </div>
+        <div class="modal-body-col">
+          <div class="modal-header-info">
+            <span class="modal-code" id="modal-vehicle-code">CODE</span>
+            <h2 id="modal-vehicle-name">Vehicle Name</h2>
+            <p class="modal-tagline" id="modal-vehicle-tagline">Tagline</p>
+          </div>
+
+          <div class="modal-meta-grid">
+            <div class="meta-cell">
+              <span class="meta-label">Launch Date</span>
+              <span class="meta-val" id="modal-launch-date">N/A</span>
+            </div>
+            <div class="meta-cell">
+              <span class="meta-label">Landing / Milestone</span>
+              <span class="meta-val" id="modal-landing-date">N/A</span>
+            </div>
+            <div class="meta-cell meta-cell--full">
+              <span class="meta-label">Coordinates / Location</span>
+              <span class="meta-val" id="modal-coordinates">N/A</span>
+            </div>
+          </div>
+
+          <div class="modal-story-wrap">
+            <p class="modal-story-text" id="modal-vehicle-story">Mission narrative content...</p>
+          </div>
+
+          <div class="modal-actions">
+            <a href="#" id="modal-exam-btn" class="btn btn--launch modal-cta-btn">Launch Mission Exam 🚀</a>
+            <a href="#" id="modal-dossier-btn" class="btn modal-secondary-btn">Full Dossier 📖</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/hub.js' %}"></script>
+<script>
+  window.PLANET_VIEWER_DATA = {{ planet_viewer_json|safe }};
+</script>
+<script src="{% static 'js/three.min.js' %}"></script>
+<script src="{% static 'js/planet_3d.js' %}"></script>
 {% endblock %}

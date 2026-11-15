@@ -19,7 +19,7 @@ from .models import (
     UserProgress, QuestionAttempt, pass_percent
 )
 from .forms import CrewLoginForm, CrewRegisterForm
-from .services import grade, record_attempt
+from .services import grade, record_attempt, calculate_user_celestial_progress
 from .pdf import certificate_pdf
 
 User = get_user_model()
@@ -31,117 +31,72 @@ User = get_user_model()
 
 def home_view(request):
     """
-    Main Mission Control Hub.
-    Displays category toggle bar (Mars, Moon, Space), live progress tracking,
-    and mission cards with instant client-side filtering.
+    Bytee 3D Mission Control Hub.
+    Renders the interactive 3D Mars and Moon exploration viewer, dual independent
+    progress bars, telemetry beacons, and in-scene mission modals.
     """
-    categories = list(Category.objects.filter(is_active=True).order_by('order', 'name'))
     vehicles = list(
         Vehicle.objects.filter(is_published=True)
         .select_related('category')
-        .prefetch_related('questions')
+        .prefetch_related('questions', 'stories')
         .order_by('category__order', 'order', 'id')
     )
 
-    total = len(vehicles)
-    earned = 0
-    overall_percent = 0
+    stats = calculate_user_celestial_progress(request.user if request.user.is_authenticated else None)
 
-    user_certs = {}
-    best_scores = {}
-    if request.user.is_authenticated:
-        for cert in Certificate.objects.filter(user=request.user).select_related('vehicle'):
-            user_certs[cert.vehicle_id] = cert
-        for att in QuizAttempt.objects.filter(user=request.user):
-            cur = best_scores.get(att.vehicle_id, 0)
-            if att.score_percent > cur:
-                best_scores[att.vehicle_id] = att.score_percent
-        earned = len(user_certs)
-        overall_percent = (earned * 100) // total if total else 0
+    # Helper to serialize vehicles for 3D exploration and in-scene modal
+    def serialize_vehicles(v_list):
+        out = []
+        for v in v_list:
+            first_story = v.stories.first()
+            story_content = first_story.content if first_story else v.tagline
+            out.append({
+                'id': v.id,
+                'slug': v.slug,
+                'code': v.code,
+                'name': v.name,
+                'tagline': v.tagline or v.mission_type or 'Historic Spacecraft',
+                'lat': v.surface_lat if v.surface_lat is not None else 0.0,
+                'lon': v.surface_lon if v.surface_lon is not None else 0.0,
+                'coords': v.coordinates or v.raw_location or 'Surface / Orbital Trajectory',
+                'raw_location': v.raw_location or v.coordinates or '',
+                'date': (v.landing_date or v.launch_date).strftime('%b %d, %Y') if (v.landing_date or v.launch_date) else 'Historical Mission',
+                'launch_date': v.raw_launch_text or (v.launch_date.strftime('%b %d, %Y') if v.launch_date else 'N/A'),
+                'landing_date': v.raw_landing_text or (v.landing_date.strftime('%b %d, %Y') if v.landing_date else 'N/A'),
+                'image': f"/static/{v.image_path}" if v.image_path else "/static/images/placeholder.svg",
+                'is_nearby_space': bool(v.is_nearby_space),
+                'orbit_altitude': float(v.orbit_altitude or 1.35),
+                'story': story_content or '',
+                'notes': v.notes or '',
+                'url': v.get_absolute_url(),
+                'quiz_url': v.get_quiz_url(),
+            })
+        return out
 
-    cat_list = []
-    for cat in categories:
-        cat_vehicles = [v for v in vehicles if v.category_id == cat.id]
-        cat_total = len(cat_vehicles)
-        cat_earned = sum(1 for v in cat_vehicles if v.id in user_certs)
-        cat_percent = (cat_earned * 100) // cat_total if cat_total else 0
+    mars_vehicles = [v for v in vehicles if v.category.slug == 'mars']
+    moon_vehicles = [v for v in vehicles if v.category.slug == 'moon']
 
-        card_list = []
-        for v in cat_vehicles:
-            v.certificate = user_certs.get(v.id)
-            v.best_score = best_scores.get(v.id)
-            card_list.append(v)
-
-        cat.total = cat_total
-        cat.earned = cat_earned
-        cat.percent = cat_percent
-        cat.card_list = card_list
-        cat_list.append(cat)
-
-    # Prepare 3D interactive viewer planet telemetry data (Moon and Mars)
     planet_viewer_data = {
         'mars': {
             'name': 'Mars',
             'texture': '/static/images/planets/mars-texture.jpg',
-            'description': 'Real topography texture with historical landing sites and rover traverses across the Martian surface.',
-            'vehicles': [
-                {
-                    'slug': v.slug,
-                    'name': v.name,
-                    'lat': v.surface_lat if v.surface_lat is not None else 10.0,
-                    'lon': v.surface_lon if v.surface_lon is not None else -20.0,
-                    'coords': v.coordinates or 'Martian Surface',
-                    'date': (v.landing_date or v.launch_date).strftime('%b %d, %Y') if (v.landing_date or v.launch_date) else 'Active',
-                    'url': v.get_absolute_url(),
-                    'quiz_url': v.get_quiz_url(),
-                }
-                for v in vehicles if v.category.slug == 'mars'
-            ]
+            'description': 'High-resolution Martian surface topography and orbital telemetry beacons. 5 surface landing sites and 4 nearby-space probes.',
+            'vehicles': serialize_vehicles(mars_vehicles),
         },
         'moon': {
             'name': 'Moon',
             'texture': '/static/images/planets/moon-texture.jpg',
-            'description': 'High-resolution lunar surface texture with Apollo landing modules and Surveyor robotic probe coordinates.',
-            'vehicles': [
-                {
-                    'slug': v.slug,
-                    'name': v.name,
-                    'lat': v.surface_lat if v.surface_lat is not None else 5.0,
-                    'lon': v.surface_lon if v.surface_lon is not None else 15.0,
-                    'coords': v.coordinates or 'Lunar Surface',
-                    'date': (v.landing_date or v.launch_date).strftime('%b %d, %Y') if (v.landing_date or v.launch_date) else '1969',
-                    'url': v.get_absolute_url(),
-                    'quiz_url': v.get_quiz_url(),
-                }
-                for v in vehicles if v.category.slug == 'moon'
-            ]
-        },
-        'space': {
-            'name': 'Deep Space',
-            'texture': '/static/images/planets/space-texture.jpg',
-            'description': 'Interstellar transit trajectories, Sun-Earth L2 Lagrange orbits, and heliocentric flight paths across deep space.',
-            'vehicles': [
-                {
-                    'slug': v.slug,
-                    'name': v.name,
-                    'lat': v.surface_lat if v.surface_lat is not None else 0.0,
-                    'lon': v.surface_lon if v.surface_lon is not None else 0.0,
-                    'coords': v.coordinates or 'Deep Space',
-                    'date': (v.landing_date or v.launch_date).strftime('%b %d, %Y') if (v.landing_date or v.launch_date) else 'Operating',
-                    'url': v.get_absolute_url(),
-                    'quiz_url': v.get_quiz_url(),
-                }
-                for v in vehicles if v.category.slug == 'space'
-            ]
+            'description': 'High-resolution lunar surface topography with historical Apollo landing modules and Surveyor robotic probe coordinates.',
+            'vehicles': serialize_vehicles(moon_vehicles),
         }
     }
 
     context = {
-        'total': total,
-        'earned': earned,
-        'overall_percent': overall_percent,
+        'stats': stats,
+        'mars_stats': stats,
+        'moon_stats': stats,
+        'total_vehicles': len(vehicles),
         'pass_percent': pass_percent(),
-        'categories': cat_list,
         'planet_viewer_json': json.dumps(planet_viewer_data),
     }
     return render(request, 'missions/home.html', context)
@@ -254,38 +209,39 @@ def vehicle_quiz_view(request, slug):
 
 def certificate_view(request):
     """
-    Unlocked achievement screen for certified space explorers.
-    Shows the certificate gallery and full print/download canvas.
+    Unlocked celestial achievement screen for certified Bytee space explorers.
+    Renders official Mars and Moon Certificates of Exploration, server-validated
+    to unlock strictly when 100% full marks have been achieved on all missions of that body.
     """
-    total_missions = Vehicle.objects.filter(is_published=True).count()
+    stats = calculate_user_celestial_progress(request.user if request.user.is_authenticated else None)
 
-    if not request.user.is_authenticated:
-        return render(request, 'missions/certificate.html', {
-            'cert': None,
-            'pass_percent': pass_percent(),
-            'total': total_missions,
-        })
+    body_param = request.GET.get('body', 'mars').strip().lower()
+    if body_param not in ('mars', 'moon'):
+        body_param = 'mars'
 
-    certificates = list(Certificate.objects.filter(user=request.user).select_related('vehicle').order_by('-issued_at'))
-    if not certificates:
-        return render(request, 'missions/certificate.html', {
-            'cert': None,
-            'certificates': [],
-            'total': total_missions,
-            'pass_percent': pass_percent(),
-        })
+    mars_cert = None
+    moon_cert = None
+    if request.user.is_authenticated:
+        mars_cert = Certificate.objects.filter(user=request.user, body_name__iexact='Mars').first()
+        moon_cert = Certificate.objects.filter(user=request.user, body_name__iexact='Moon').first()
 
-    mission_slug = request.GET.get('mission')
-    selected_cert = None
-    if mission_slug:
-        selected_cert = next((c for c in certificates if c.vehicle.slug == mission_slug), None)
-    if not selected_cert:
-        selected_cert = certificates[0]
+    selected_body = 'Mars' if body_param == 'mars' else 'Moon'
+    selected_cert = mars_cert if body_param == 'mars' else moon_cert
+    selected_progress = stats['mars_percent'] if body_param == 'mars' else stats['moon_percent']
+    selected_passed_count = stats['mars_passed'] if body_param == 'mars' else stats['moon_passed']
+    selected_total_count = stats['mars_total'] if body_param == 'mars' else stats['moon_total']
 
     return render(request, 'missions/certificate.html', {
+        'is_authenticated': request.user.is_authenticated,
+        'body_param': body_param,
+        'selected_body': selected_body,
         'cert': selected_cert,
-        'certificates': certificates,
-        'total': total_missions,
+        'mars_cert': mars_cert,
+        'moon_cert': moon_cert,
+        'stats': stats,
+        'selected_progress': selected_progress,
+        'selected_passed_count': selected_passed_count,
+        'selected_total_count': selected_total_count,
         'owner': True,
         'auto_print': request.GET.get('print') == '1',
     })
@@ -293,12 +249,13 @@ def certificate_view(request):
 
 def certificate_download_view(request, code):
     """
-    Streams a crisp, high-resolution vector PDF of the official certificate.
+    Streams a crisp, high-resolution vector PDF of the official Bytee certificate.
     """
-    cert = get_object_or_404(Certificate.objects.select_related('vehicle', 'user'), code=code)
+    cert = get_object_or_404(Certificate.objects.select_related('user'), code=code)
     pdf_bytes = certificate_pdf(cert)
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="NASA_Certificate_{cert.code}.pdf"'
+    body_slug = (cert.body_name or 'exploration').lower()
+    response['Content-Disposition'] = f'attachment; filename="Bytee_{body_slug}_Certificate_{cert.code}.pdf"'
     return response
 
 
@@ -315,7 +272,8 @@ def certificate_rename_view(request, code):
         cert.recipient_name = new_name
         cert.save(update_fields=['recipient_name'])
         messages.success(request, f"Certificate recipient updated to {new_name}.")
-    return redirect(f"{reverse('certificate')}?mission={cert.vehicle.slug}")
+    target_body = (cert.body_name or 'mars').lower()
+    return redirect(f"{reverse('certificate')}?body={target_body}")
 
 
 # --------------------------------------------------------------------------

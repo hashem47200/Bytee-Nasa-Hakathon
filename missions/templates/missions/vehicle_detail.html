@@ -1,14 +1,18 @@
 {% extends 'missions/base.html' %}{% load static %}
-{% block title %}{{ vehicle.name }} · NASA Explorer Hub{% endblock %}
+{% block title %}{{ vehicle.name }} · Bytee Explorer Hub{% endblock %}
 {% block description %}{{ vehicle.tagline }}{% endblock %}
 {% block content %}
-<nav class="crumbs" aria-label="Breadcrumb"><a href="{% url 'home' %}">Hub</a> / <a href="{% url 'home' %}#{{ category.slug }}">{{ category.name }}</a> / <span>{{ vehicle.name }}</span></nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="{% url 'home' %}">3D Mission Control</a> / <a href="{% url 'dataset_explorer' %}?cat={{ category.slug }}">{{ category.name }}</a> / <span>{{ vehicle.name }}</span></nav>
 
-<section class="scene {% if deep_space %}scene--deep{% endif %}" {% if category.texture_image %}style="--scene-img:url('{% static category.texture_image %}')"{% endif %}>
+<section class="scene {% if vehicle.is_nearby_space %}scene--deep{% endif %}" {% if category.texture_image %}style="--scene-img:url('{% static category.texture_image %}')"{% endif %}>
   <div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <span class="chip {% if deep_space %}chip--violet{% else %}chip--cyan{% endif %}">{{ category.icon }} {{ category.name }}</span>
-      {% if vehicle.mission_type %}<span class="chip">{{ vehicle.mission_type }}</span>{% endif %}
+      <span class="chip {% if category.slug == 'mars' %}chip--mars{% else %}chip--cyan{% endif %}">{{ category.icon }} {{ category.name }}</span>
+      {% if vehicle.is_nearby_space %}
+        <span class="chip chip--violet">🛰️ Orbital / Nearby-Space Probe</span>
+      {% else %}
+        <span class="chip chip--ok">📍 Surface Vehicle / Lander</span>
+      {% endif %}
       {% if vehicle.status_label %}<span class="chip chip--ok">{{ vehicle.status_label }}</span>{% endif %}
     </div>
     <h1>{{ vehicle.name }}</h1>
@@ -21,31 +25,50 @@
 
 <div class="cols">
   <article class="panel story">
-    <h2>{% if deep_space %}MISSION LOG{% else %}MISSION NARRATIVE{% endif %}</h2>
+    <h2>MISSION NARRATIVE & LOG</h2>
     {% for s in vehicle.stories.all %}
       {% if s.title and vehicle.stories.all|length > 1 %}<h3>{{ s.title }}</h3>{% endif %}
       {{ s.content|linebreaks }}
-    {% empty %}<p class="muted">The story for this mission is being written.</p>{% endfor %}
+    {% empty %}
+      <p class="muted">{{ vehicle.notes|default:"Authentic mission history recorded in the Bytee planetary dataset." }}</p>
+    {% endfor %}
   </article>
+
   <aside class="panel specs">
-    <h2>SPEC SHEET</h2>
+    <h2>SPECIFICATIONS & TELEMETRY</h2>
     <dl class="spec">
-      <div><dt>Mission code</dt><dd>{{ vehicle.code }}</dd></div>
-      {% if vehicle.launch_date %}<div><dt>Launched</dt><dd>{{ vehicle.launch_date|date:"j M Y" }}</dd></div>{% endif %}
-      {% if vehicle.landing_date %}<div><dt>{{ vehicle.milestone_label }}</dt><dd>{{ vehicle.landing_date|date:"j M Y" }}</dd></div>{% endif %}
-      {% if vehicle.coordinates %}<div><dt>{{ vehicle.location_label }}</dt><dd>{{ vehicle.coordinates }}</dd></div>{% endif %}
-      {% for s in vehicle.specs.all %}<div><dt>{{ s.label }}</dt><dd>{{ s.value }}</dd></div>{% endfor %}
+      <div><dt>Mission code</dt><dd><span class="code-badge code-badge--cyan">{{ vehicle.code }}</span></dd></div>
+      {% if vehicle.launch_date %}
+        <div><dt>Launched</dt><dd>{{ vehicle.launch_date|date:"j M Y" }}</dd></div>
+      {% elif vehicle.raw_launch_text %}
+        <div><dt>Launched</dt><dd>{{ vehicle.raw_launch_text }}</dd></div>
+      {% endif %}
+
+      {% if vehicle.landing_date %}
+        <div><dt>{{ vehicle.milestone_label }}</dt><dd>{{ vehicle.landing_date|date:"j M Y" }}</dd></div>
+      {% elif vehicle.raw_landing_text %}
+        <div><dt>{{ vehicle.milestone_label }}</dt><dd>{{ vehicle.raw_landing_text }}</dd></div>
+      {% endif %}
+
+      {% if vehicle.coordinates or vehicle.raw_location %}
+        <div><dt>{{ vehicle.location_label }}</dt><dd>{{ vehicle.raw_location|default:vehicle.coordinates }}</dd></div>
+      {% endif %}
+
+      {% for s in vehicle.specs.all %}
+        <div><dt>{{ s.label }}</dt><dd>{{ s.value }}</dd></div>
+      {% endfor %}
     </dl>
   </aside>
 </div>
 
 <section class="panel cta">
-  <h2>Ready for your mission exam?</h2>
-  <p class="muted">{{ question_total }} question{{ question_total|pluralize }} · score {{ pass_percent }}% or higher to earn your NASA Explorer Certificate</p>
+  <h2>Ready for your flight readiness exam?</h2>
+  <p class="muted">{{ question_total }} question{{ question_total|pluralize }} · score 100% full marks to earn {{ category.name }} Certificate credit</p>
   {% if question_total %}
     <a class="btn btn--launch" href="{% url 'vehicle_quiz' vehicle.slug %}">Launch Mission Exam 🚀</a>
-    {% if not user.is_authenticated %}<p class="muted" style="margin:14px 0 0"><small>You'll be asked to log in so your certificate carries your name.</small></p>{% endif %}
-  {% else %}<p>No exam questions yet for this mission. Check back soon.</p>{% endif %}
-  {% if certificate %}<p style="margin-top:18px"><span class="chip chip--ok">✓ Certified {{ certificate.score_percent }}%</span> <a href="{% url 'certificate' %}?mission={{ vehicle.slug }}">View your certificate</a></p>{% endif %}
+    {% if not user.is_authenticated %}<p class="muted" style="margin:14px 0 0"><small>Log in to record your score toward the {{ category.name }} Certificate of Exploration.</small></p>{% endif %}
+  {% else %}
+    <p>No exam questions yet for this mission.</p>
+  {% endif %}
 </section>
 {% endblock %}

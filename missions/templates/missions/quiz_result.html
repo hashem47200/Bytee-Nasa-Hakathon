@@ -1,31 +1,38 @@
 {% extends 'missions/base.html' %}
-{% block title %}Exam result · {{ vehicle.name }}{% endblock %}
+{% block title %}Exam Result · {{ vehicle.name }} · Bytee Explorer Hub{% endblock %}
 {% block content %}
 <div class="result">
-  <nav class="crumbs"><a href="{% url 'home' %}">Hub</a> / <a href="{{ vehicle.get_absolute_url }}">{{ vehicle.name }}</a> / <span>Result</span></nav>
+  <nav class="crumbs"><a href="{% url 'home' %}">3D Mission Control</a> / <a href="{{ vehicle.get_absolute_url }}">{{ vehicle.name }}</a> / <span>Result</span></nav>
   {% if attempt.passed %}
   <section class="panel result--pass">
-    <div class="badge-big" style="color:var(--green)">🏅 MISSION SUCCESS</div>
+    <div class="badge-big" style="color:var(--green)">🏅 100% MISSION SUCCESS</div>
     <div class="ring" style="--pct:{{ attempt.score_percent }};--ring:var(--green)"><span>{{ attempt.score_percent }}%</span></div>
-    <p>{{ attempt.correct_count }} of {{ attempt.total_questions }} correct. You cleared the {{ attempt.pass_percent }}% pass mark for <strong>{{ vehicle.name }}</strong>.</p>
-    <p><strong>NASA Explorer Certificate unlocked.</strong></p>
+    <p>{{ attempt.correct_count }} of {{ attempt.total_questions }} correct. You achieved 100% full marks for <strong>{{ vehicle.name }}</strong>!</p>
+    <p class="muted">This victory advances your <strong>{{ vehicle.category.name }} Exploration Progress</strong>.</p>
+    {% if certificate %}
+      <div class="cert-unlocked-banner" style="margin:16px 0;padding:12px;background:rgba(61,255,154,0.12);border:1px solid #3dff9a;border-radius:8px">
+        <strong style="color:#3dff9a">🏆 {{ certificate.title }} UNLOCKED!</strong>
+        <p style="margin:4px 0 0">You have completed all missions for {{ vehicle.category.name }} at 100%!</p>
+      </div>
+    {% endif %}
     <div class="actions">
       {% if certificate %}
-      <a class="btn btn--success" href="{% url 'certificate_download' certificate.code %}">⬇ Download certificate</a>
-      <a class="btn" href="{% url 'certificate' %}?mission={{ vehicle.slug }}">View certificate</a>
+        <a class="btn btn--success" href="{% url 'certificate_download' certificate.code %}">⬇ Download Official Certificate</a>
+        <a class="btn" href="{% url 'certificate' %}?body={{ vehicle.category.slug }}">View Certificate</a>
       {% endif %}
-      <a class="btn" href="{% url 'home' %}">Next mission</a>
+      <a class="btn btn--launch" href="{% url 'home' %}">Return to 3D Mission Control</a>
     </div>
   </section>
   {% else %}
   <section class="panel result--fail">
-    <div class="badge-big" style="color:var(--red)">⚠ TELEMETRY LOST</div>
+    <div class="badge-big" style="color:var(--red)">⚠ TELEMETRY INCOMPLETE ({{ attempt.score_percent }}%)</div>
     <div class="ring" style="--pct:{{ attempt.score_percent }};--ring:var(--red)"><span>{{ attempt.score_percent }}%</span></div>
-    <p>You answered {{ attempt.correct_count }} of {{ attempt.total_questions }} correctly. The pass mark is {{ attempt.pass_percent }}%, so this signal didn't make it home.</p>
-    <p class="muted">Re-read the mission log, check the hints below, then try again. Every launch teaches something.</p>
+    <p>You answered {{ attempt.correct_count }} of {{ attempt.total_questions }} correctly. The Bytee standard requires a strict <strong>100% full mark</strong> to earn exploration credit.</p>
+    <p class="muted">Review the hints below, check the authentic mission log, and retake the exam to achieve certification.</p>
     <div class="actions">
-      <a class="btn btn--danger" href="{% url 'vehicle_quiz' vehicle.slug %}">🔄 Retake Exam</a>
-      <a class="btn" href="{{ vehicle.get_absolute_url }}">Re-read the story</a>
+      <a class="btn btn--danger" href="{% url 'vehicle_quiz' vehicle.slug %}">🔄 Retake Mission Exam</a>
+      <a class="btn" href="{{ vehicle.get_absolute_url }}">Re-read Mission Story</a>
+      <a class="btn" href="{% url 'home' %}">3D Mission Control</a>
     </div>
   </section>
   {% endif %}

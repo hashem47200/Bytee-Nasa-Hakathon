@@ -14,8 +14,8 @@ def _new_certificate_code():
 
 
 def pass_percent():
-    """Returns the passing mark percentage for mission exams (default 60%)."""
-    return getattr(settings, 'NASA_PASS_PERCENT', 60)
+    """Returns the passing mark percentage for mission exams (strict 100% full-mark requirement)."""
+    return getattr(settings, 'NASA_PASS_PERCENT', 100)
 
 
 class Category(models.Model):
@@ -92,6 +92,14 @@ class Vehicle(models.Model):
         help_text="Label for coordinates, e.g. 'Position' for deep-space craft."
     )
     image_path = models.CharField(max_length=255, blank=True, default='')
+    is_nearby_space = models.BooleanField(
+        default=False,
+        help_text="True if floating in nearby space/orbit around the body rather than physically on surface."
+    )
+    orbit_altitude = models.FloatField(
+        default=1.35,
+        help_text="Visual orbit distance multiplier for 3D viewer."
+    )
     order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -248,13 +256,18 @@ class QuizAttempt(models.Model):
 
 class Certificate(models.Model):
     """
-    Personalized NASA Explorer Certificate unlocked upon scoring >= 60%.
+    Personalized Celestial Body Certificate of Exploration (Mars or Moon)
+    unlocked upon achieving 100% full marks across all required vehicle exams for that body.
     """
     code = models.CharField(max_length=20, unique=True, default=_new_certificate_code, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificates')
-    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='certificates')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='certificates', null=True, blank=True)
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='certificates', null=True, blank=True)
+    body_name = models.CharField(max_length=50, blank=True, default='', help_text="e.g. Mars or Moon")
+    certificate_type = models.CharField(max_length=40, default='body', help_text="'body' for celestial body certificate")
+    title = models.CharField(max_length=120, default='Certificate of Exploration')
     recipient_name = models.CharField(max_length=80)
-    score_percent = models.PositiveSmallIntegerField()
+    score_percent = models.PositiveSmallIntegerField(default=100)
     issued_at = models.DateTimeField(default=timezone.now)
     quiz_attempt = models.ForeignKey(
         QuizAttempt, on_delete=models.SET_NULL, null=True, blank=True,
@@ -265,22 +278,27 @@ class Certificate(models.Model):
         ordering = ['-issued_at']
         verbose_name = 'Certificate'
         verbose_name_plural = 'Certificates'
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'vehicle'], name='uniq_user_vehicle_certificate'),
-        ]
 
     def __str__(self):
-        return f"Certificate {self.code} - {self.recipient_name} ({self.vehicle.name})"
+        target = self.body_name or (self.vehicle.name if self.vehicle else "Mission")
+        return f"Certificate {self.code} - {self.recipient_name} ({target})"
 
     def get_absolute_url(self):
-        return f"{reverse('certificate')}?mission={self.vehicle.slug}"
+        if self.body_name:
+            return f"{reverse('certificate')}?body={self.body_name.lower()}"
+        return reverse('certificate')
 
 
 class UserProgress(models.Model):
     """
     Aggregate progress and achievement metrics for an authenticated user.
+    Tracks Mars and Moon progress completely independently.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='progress')
+    mars_progress_percent = models.PositiveSmallIntegerField(default=0)
+    moon_progress_percent = models.PositiveSmallIntegerField(default=0)
+    mars_certified = models.BooleanField(default=False)
+    moon_certified = models.BooleanField(default=False)
     total_questions_answered = models.PositiveIntegerField(default=0)
     total_correct_answers = models.PositiveIntegerField(default=0)
     total_wrong_answers = models.PositiveIntegerField(default=0)

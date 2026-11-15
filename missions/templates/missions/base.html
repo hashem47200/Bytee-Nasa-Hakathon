@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}NASA Explorer Hub{% endblock %}</title>
-  <meta name="description" content="{% block description %}Explore missions to Mars, the Moon and deep space, pass the mission exam and earn your NASA Explorer Certificate.{% endblock %}">
+  <title>{% block title %}Bytee Space Explorer Hub{% endblock %}</title>
+  <meta name="description" content="{% block description %}Explore authentic missions to Mars and the Moon, achieve 100% full-mark exam scores, and earn your official Bytee Certificate of Exploration.{% endblock %}">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
@@ -13,18 +13,18 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="{% url 'home' %}">🚀 <span>NASA <b>EXPLORER HUB</b></span></a>
+    <a class="brand" href="{% url 'home' %}">🪐 <span>BYTEE <b>EXPLORER HUB</b></span></a>
     <nav class="nav" aria-label="Main">
-      <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>Mission Hub</a>
+      <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>3D Mission Hub</a>
       <a href="{% url 'dataset_explorer' %}" class="nav-pill-db" {% if request.resolver_match.url_name == 'dataset_explorer' %}aria-current="page"{% endif %}>Database Records</a>
-      <a href="{% url 'certificate' %}" {% if request.resolver_match.url_name == 'certificate' %}aria-current="page"{% endif %}>My Certificates</a>
+      <a href="{% url 'certificate' %}" {% if request.resolver_match.url_name == 'certificate' %}aria-current="page"{% endif %}>Certificates</a>
       {% if user.is_staff %}<a href="{% url 'admin:index' %}">Admin</a>{% endif %}
       {% if user.is_authenticated %}
         <span class="user-chip">👨‍🚀 {{ user.get_username }}</span>
         <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="linklike" type="submit">Log out</button></form>
       {% else %}
         <a href="{% url 'login' %}">Log in</a>
-        <a class="btn btn--primary" style="padding:8px 18px" href="{% url 'register' %}">Join the crew</a>
+        <a class="btn btn--primary" style="padding:8px 18px" href="{% url 'register' %}">Join Crew</a>
       {% endif %}
     </nav>
   </div>
@@ -33,7 +33,7 @@
   {% if messages %}<ul class="messages">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
   {% block content %}{% endblock %}
 </div></main>
-<footer class="site-footer"><div class="wrap">NASA Explorer Hub · An educational project · Mars · Moon · Deep Space</div></footer>
+<footer class="site-footer"><div class="wrap">Bytee Space Exploration Platform · Official Competition Edition · Mars & Moon Planetary Systems</div></footer>
 {% block scripts %}{% endblock %}
 </body>
 </html>

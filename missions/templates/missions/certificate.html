@@ -1,49 +1,125 @@
 {% extends 'missions/base.html' %}{% load static %}
-{% block title %}NASA Explorer Certificate{% endblock %}
+{% block title %}Bytee Celestial Certificates of Exploration{% endblock %}
 {% block body_attrs %} data-auto-print="{% if auto_print %}1{% else %}0{% endif %}"{% endblock %}
+
 {% block content %}
-{% if not cert %}
-<section class="panel locked">
-  <div class="lock">🔒</div>
-  <h1>Certificate locked</h1>
-  <p>Pass any mission exam with {{ pass_percent|default:"60" }}% or more to unlock your personalised NASA Explorer Certificate.</p>
-  <a class="btn btn--primary" href="{% url 'home' %}">Choose a mission</a>
-</section>
-{% else %}
-<h1 class="no-print">{% if public_view and not owner %}Certificate of Exploration{% else %}Your NASA Explorer Certificates{% endif %}</h1>
-<div class="cert-layout">
-  {% if certificates %}
-  <nav class="cert-list no-print" aria-label="Your certificates">
-    {% for c in certificates %}<a href="?mission={{ c.vehicle.slug }}" {% if c.pk == cert.pk %}aria-current="true"{% endif %}>🏅 {{ c.vehicle.name }}<br><small class="muted">{{ c.score_percent }}% · {{ c.issued_at|date:"j M Y" }}</small></a>{% endfor %}
-    <p class="muted"><small>{{ certificates|length }} of {{ total }} missions certified.</small></p>
-  </nav>
-  {% endif %}
-  <div>
-    <article class="paper" id="certificate">
-      <div class="org">NASA EXPLORER HUB</div>
-      <h1>Certificate of Exploration</h1>
-      <div class="muted">This certifies that</div>
-      <div class="name">{{ cert.recipient_name }}</div>
-      <div class="muted">has passed the Mission Exam for</div>
-      <div class="mission">{{ cert.vehicle.name }}</div>
-      <div>with a score of <strong>{{ cert.score_percent }}%</strong></div>
-      <div class="meta">Issued {{ cert.issued_at|date:"j F Y" }} · Certificate No. {{ cert.code }}</div>
+<div class="cert-container">
+
+  <!-- Header & Celestial Body Tabs -->
+  <header class="cert-page-header">
+    <div>
+      <span class="hud-badge"><span class="pulse-beacon"></span> OFFICIAL ACCREDITATION</span>
+      <h1 class="cert-page-title">Bytee <span class="cyan-glow">Certificates of Exploration</span></h1>
+      <p class="cert-page-subtitle">Server-validated celestial credentials unlocked upon achieving 100% full-mark mastery across all missions for each planetary body.</p>
+    </div>
+
+    <!-- Celestial Switcher Tabs -->
+    <div class="cert-body-tabs" role="tablist">
+      <a href="?body=mars" class="cert-tab {% if body_param == 'mars' %}is-active{% endif %}" role="tab" aria-selected="{% if body_param == 'mars' %}true{% else %}false{% endif %}">
+        <span class="tab-icon">🔴</span>
+        <div class="tab-info">
+          <strong>Mars Certificate</strong>
+          <span class="tab-status">
+            {% if mars_cert %}
+              <span class="status--unlocked">🏆 Certified 100%</span>
+            {% else %}
+              <span class="status--locked">🔒 Locked ({{ stats.mars_percent }}%)</span>
+            {% endif %}
+          </span>
+        </div>
+      </a>
+
+      <a href="?body=moon" class="cert-tab {% if body_param == 'moon' %}is-active{% endif %}" role="tab" aria-selected="{% if body_param == 'moon' %}true{% else %}false{% endif %}">
+        <span class="tab-icon">🌕</span>
+        <div class="tab-info">
+          <strong>Moon Certificate</strong>
+          <span class="tab-status">
+            {% if moon_cert %}
+              <span class="status--unlocked">🏆 Certified 100%</span>
+            {% else %}
+              <span class="status--locked">🔒 Locked ({{ stats.moon_percent }}%)</span>
+            {% endif %}
+          </span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  {% if not is_authenticated %}
+  <section class="panel locked-cert-panel">
+    <div class="lock-icon">🔒</div>
+    <h2>Authentication Required</h2>
+    <p>Please log in or register to record your mission telemetry and unlock server-validated Bytee Celestial Certificates.</p>
+    <div class="actions" style="justify-content:center;margin-top:20px;">
+      <a class="btn btn--primary" href="{% url 'login' %}?next={% url 'certificate' %}">Log In</a>
+      <a class="btn" href="{% url 'register' %}">Join Crew</a>
+    </div>
+  </section>
+
+  {% elif not cert %}
+  <!-- Locked Certificate Display -->
+  <section class="panel locked-cert-panel">
+    <div class="lock-icon">🔒</div>
+    <h2>{{ selected_body }} Certificate of Exploration Locked</h2>
+    <p class="locked-cert-msg">
+      To earn this official Bytee credential, you must achieve <strong>100% full marks</strong> on all <strong>{{ selected_total_count }} {{ selected_body }} mission exams</strong>.
+    </p>
+
+    <div class="locked-progress-box">
+      <div class="locked-progress-head">
+        <span>Current Progress: <strong>{{ selected_progress }}%</strong></span>
+        <span>{{ selected_passed_count }} of {{ selected_total_count }} missions completed at 100%</span>
+      </div>
+      <div class="progress-track" style="margin-top:8px;">
+        <div class="progress-fill {% if selected_body == 'Mars' %}progress-fill--mars{% else %}progress-fill--moon{% endif %}" style="width: {{ selected_progress }}%;"></div>
+      </div>
+    </div>
+
+    <div class="actions" style="justify-content:center;margin-top:24px;">
+      <a class="btn btn--launch" href="{% url 'home' %}">← Return to 3D Mission Control</a>
+    </div>
+  </section>
+
+  {% else %}
+  <!-- Unlocked Celestial Certificate Canvas -->
+  <div class="unlocked-cert-wrapper">
+    <article class="paper paper--bytee" id="certificate">
+      <div class="cert-frame-inner">
+        <div class="org">BYTEE EXPLORER HUB</div>
+        <h1 class="cert-title">{{ selected_body|upper }} CERTIFICATE OF EXPLORATION</h1>
+        <div class="cert-divider-line"></div>
+        <div class="cert-subtext">This certifies that</div>
+        <div class="name">{{ cert.recipient_name }}</div>
+        <div class="cert-subtext">has successfully passed 100% full-mark evaluations across all</div>
+        <div class="mission">{{ selected_body }} Exploration Missions</div>
+        <div class="cert-score">and is officially certified with a score of <strong>100%</strong></div>
+        <div class="meta">Issued {{ cert.issued_at|date:"j F Y" }} · Official Verification Code: {{ cert.code }}</div>
+      </div>
     </article>
-    <div class="actions no-print" style="justify-content:flex-start">
+
+    <div class="cert-action-bar no-print">
       <a class="btn btn--success" href="{% url 'certificate_download' cert.code %}">⬇ Download PDF</a>
       <button class="btn" type="button" data-print>🖨 Print</button>
-      <button class="btn" type="button" id="copy-link" data-url="{{ request.scheme }}://{{ request.get_host }}{{ cert.get_absolute_url }}">🔗 Copy share link</button>
+      <button class="btn" type="button" id="copy-link" data-url="{{ request.scheme }}://{{ request.get_host }}{% url 'certificate' %}?body={{ body_param }}">🔗 Copy share link</button>
+      <a class="btn" href="{% url 'home' %}">← Mission Hub</a>
     </div>
+
     {% if owner %}
-    <form class="panel no-print inline-form" method="post" action="{% url 'certificate_rename' cert.code %}" style="margin-top:18px">
+    <form class="panel no-print cert-name-form" method="post" action="{% url 'certificate_rename' cert.code %}">
       {% csrf_token %}
-      <label for="rn" style="width:100%;font-weight:600">Name printed on this certificate</label>
-      <input id="rn" type="text" name="recipient_name" value="{{ cert.recipient_name }}" maxlength="80" required>
-      <button class="btn btn--primary" type="submit">Update name</button>
+      <div class="inline-form-group">
+        <label for="rn">Name printed on this certificate:</label>
+        <input id="rn" type="text" name="recipient_name" value="{{ cert.recipient_name }}" maxlength="80" required>
+        <button class="btn btn--primary" type="submit">Update name</button>
+      </div>
     </form>
     {% endif %}
   </div>
+  {% endif %}
+
 </div>
-{% endif %}
 {% endblock %}
-{% block scripts %}<script src="{% static 'js/certificate.js' %}"></script>{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/certificate.js' %}"></script>
+{% endblock %}
