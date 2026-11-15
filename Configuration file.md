@@ -1,18 +1,6 @@
 # \# ==========================================
 
-# \# 1. ONE-CLICK LAUNCH (Windows Executable)
-
-# \# ==========================================
-
-# Double-click `Start-NASA-Explorer-Hub.exe` (or `Start-NASA-Explorer-Hub.bat`) to automatically set up and start the server.
-
-# Open http://127.0.0.1:8123 in your browser.
-
-# 
-
-# \# ==========================================
-
-# \# 2. MANUAL LOCAL SERVER SETUP
+# \# 1. MANUAL LOCAL SERVER SETUP
 
 # \# ==========================================
 
@@ -48,7 +36,7 @@
 
 # \# ==========================================
 
-# \# 3. PRODUCTION DEPLOYMENT
+# \# 2. PRODUCTION DEPLOYMENT
 
 # \# ==========================================
 
@@ -72,7 +60,7 @@
 
 # \# ==========================================
 
-# \# 4. VERIFICATION \& TESTS
+# \# 3. VERIFICATION \& TESTS
 
 # \# ==========================================
 
